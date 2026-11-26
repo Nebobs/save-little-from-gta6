@@ -1,0 +1,24 @@
+:root {
+  --bg-base: #05050f;
+  --bg-surface: #0a0a1e;
+  --bg-card: rgba(255,255,255,0.03);
+  --bg-card-hover: rgba(255,255,255,0.055);
+  --border: rgba(255,255,255,0.07);
+  --border-bright: rgba(255,255,255,0.14);
+  --neon-purple: #8b5cf6;
+  --neon-cyan: #22d3ee;
+  --neon-pink: #f472b6;
+  --neon-green: #4ade80;
+  --neon-orange: #fb923c;
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --text-muted: #475569;
+  --radius-sm: 8px; --radius-md: 12px; --radius-lg: 18px; --radius-xl: 24px;
+  --shadow-neon-purple: 0 0 24px rgba(139,92,246,0.35), 0 0 60px rgba(139,92,246,0.12);
+  --shadow-card: 0 4px 24px rgba(0,0,0,0.5);
+  --transition-fast: 150ms ease-out;
+  --transition-std: 250ms ease-out;
+  --font-heading: 'Space Grotesk', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  --font-mono: 'Space Mono', monospace;
+}

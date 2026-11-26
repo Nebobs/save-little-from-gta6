@@ -1,1435 +1,250 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Save Little — Operation: Real Life</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
-  <style>
-    /* ─── Design Tokens ─────────────────────────────────────────────── */
-    :root {
-      --bg-base:       #05050f;
-      --bg-surface:    #0a0a1e;
-      --bg-card:       rgba(255,255,255,0.03);
-      --bg-card-hover: rgba(255,255,255,0.055);
-      --border:        rgba(255,255,255,0.07);
-      --border-bright: rgba(255,255,255,0.14);
-
-      --neon-purple: #8b5cf6;
-      --neon-cyan:   #22d3ee;
-      --neon-pink:   #f472b6;
-      --neon-green:  #4ade80;
-      --neon-orange: #fb923c;
-
-      --text-primary:   #f1f5f9;
-      --text-secondary: #94a3b8;
-      --text-muted:     #475569;
-
-      --radius-sm:  8px;
-      --radius-md:  12px;
-      --radius-lg:  18px;
-      --radius-xl:  24px;
-
-      --shadow-neon-purple: 0 0 24px rgba(139,92,246,0.35), 0 0 60px rgba(139,92,246,0.12);
-      --shadow-neon-cyan:   0 0 24px rgba(34,211,238,0.35), 0 0 60px rgba(34,211,238,0.12);
-      --shadow-card:        0 4px 24px rgba(0,0,0,0.5);
-
-      --transition-fast: 150ms ease-out;
-      --transition-std:  250ms ease-out;
-    }
-
-    /* ─── Reset & Base ───────────────────────────────────────────────── */
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    html { scroll-behavior: smooth; }
-
-    body {
-      font-family: 'Inter', sans-serif;
-      background-color: var(--bg-base);
-      color: var(--text-primary);
-      font-size: 16px;
-      line-height: 1.6;
-      overflow-x: hidden;
-      min-height: 100dvh;
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
-    }
-
-    /* ─── Background Grid ────────────────────────────────────────────── */
-    body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background-image:
-        linear-gradient(rgba(139,92,246,0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(139,92,246,0.03) 1px, transparent 1px);
-      background-size: 48px 48px;
-      pointer-events: none;
-      z-index: 0;
-    }
-
-    /* ─── Noise texture ──────────────────────────────────────────────── */
-    body::after {
-      content: '';
-      position: fixed;
-      inset: 0;
-      opacity: 0.025;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
-      pointer-events: none;
-      z-index: 0;
-    }
-
-    /* ─── Layout ─────────────────────────────────────────────────────── */
-    .container {
-      max-width: 1100px;
-      margin: 0 auto;
-      padding: 0 24px;
-      position: relative;
-      z-index: 1;
-    }
-
-    section { padding: 100px 0; }
-
-    /* ─── Nav ────────────────────────────────────────────────────────── */
-    nav {
-      position: fixed;
-      top: 0; left: 0; right: 0;
-      z-index: 100;
-      backdrop-filter: blur(16px) saturate(180%);
-      -webkit-backdrop-filter: blur(16px) saturate(180%);
-      background: rgba(5,5,15,0.75);
-      border-bottom: 1px solid var(--border);
-    }
-
-    .nav-inner {
-      max-width: 1100px;
-      margin: 0 auto;
-      padding: 0 24px;
-      height: 64px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      position: relative;
-      z-index: 1;
-    }
-
-    .nav-logo {
-      font-family: 'Space Grotesk', sans-serif;
-      font-weight: 700;
-      font-size: 18px;
-      color: var(--text-primary);
-      text-decoration: none;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .nav-logo-icon {
-      width: 32px; height: 32px;
-      background: linear-gradient(135deg, var(--neon-purple), var(--neon-cyan));
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: var(--shadow-neon-purple);
-    }
-
-    .nav-links {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      list-style: none;
-    }
-
-    .nav-links a {
-      color: var(--text-secondary);
-      text-decoration: none;
-      font-size: 14px;
-      font-weight: 500;
-      padding: 6px 14px;
-      border-radius: var(--radius-sm);
-      transition: color var(--transition-fast), background var(--transition-fast);
-    }
-
-    .nav-links a:hover {
-      color: var(--text-primary);
-      background: rgba(255,255,255,0.06);
-    }
-
-    .nav-cta {
-      background: linear-gradient(135deg, var(--neon-purple), #6d28d9) !important;
-      color: white !important;
-      box-shadow: 0 0 16px rgba(139,92,246,0.4);
-    }
-
-    .nav-cta:hover {
-      background: linear-gradient(135deg, #9d72ff, var(--neon-purple)) !important;
-      box-shadow: 0 0 24px rgba(139,92,246,0.6) !important;
-    }
-
-    /* ─── Hero ───────────────────────────────────────────────────────── */
-    #hero {
-      padding: 180px 0 100px;
-      text-align: center;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .hero-glow {
-      position: absolute;
-      border-radius: 50%;
-      filter: blur(80px);
-      pointer-events: none;
-    }
-
-    .hero-glow-1 {
-      width: 600px; height: 400px;
-      background: rgba(139,92,246,0.18);
-      top: 0; left: 50%;
-      transform: translateX(-50%);
-    }
-
-    .hero-glow-2 {
-      width: 400px; height: 300px;
-      background: rgba(34,211,238,0.1);
-      top: 100px; left: 20%;
-    }
-
-    .hero-glow-3 {
-      width: 400px; height: 300px;
-      background: rgba(244,114,182,0.1);
-      top: 100px; right: 10%;
-    }
-
-    .hero-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 6px 16px;
-      border-radius: 999px;
-      border: 1px solid rgba(139,92,246,0.4);
-      background: rgba(139,92,246,0.1);
-      color: #c4b5fd;
-      font-size: 13px;
-      font-weight: 500;
-      margin-bottom: 28px;
-      animation: fadeInDown 0.6s ease-out;
-    }
-
-    .hero-badge-dot {
-      width: 7px; height: 7px;
-      border-radius: 50%;
-      background: var(--neon-purple);
-      box-shadow: 0 0 8px var(--neon-purple);
-      animation: pulse 2s ease-in-out infinite;
-    }
-
-    @keyframes pulse {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50%       { opacity: 0.6; transform: scale(0.85); }
-    }
-
-    @keyframes fadeInDown {
-      from { opacity: 0; transform: translateY(-16px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-
-    @keyframes fadeInUp {
-      from { opacity: 0; transform: translateY(24px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to   { opacity: 1; }
-    }
-
-    .hero-title {
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: clamp(40px, 7vw, 76px);
-      font-weight: 700;
-      line-height: 1.1;
-      letter-spacing: -0.02em;
-      margin-bottom: 24px;
-      animation: fadeInUp 0.7s ease-out 0.1s both;
-    }
-
-    .hero-title-line2 {
-      background: linear-gradient(90deg, var(--neon-purple), var(--neon-cyan), var(--neon-pink));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-
-    .hero-sub {
-      font-size: 18px;
-      color: var(--text-secondary);
-      max-width: 560px;
-      margin: 0 auto 40px;
-      line-height: 1.65;
-      animation: fadeInUp 0.7s ease-out 0.2s both;
-    }
-
-    .hero-actions {
-      display: flex;
-      gap: 14px;
-      justify-content: center;
-      flex-wrap: wrap;
-      animation: fadeInUp 0.7s ease-out 0.3s both;
-    }
-
-    /* ─── Buttons ────────────────────────────────────────────────────── */
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 12px 26px;
-      border-radius: var(--radius-md);
-      font-size: 15px;
-      font-weight: 600;
-      text-decoration: none;
-      cursor: pointer;
-      border: none;
-      transition: all var(--transition-std);
-      font-family: 'Inter', sans-serif;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .btn::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: rgba(255,255,255,0);
-      transition: background var(--transition-fast);
-    }
-
-    .btn:hover::after { background: rgba(255,255,255,0.08); }
-    .btn:active { transform: scale(0.97); }
-
-    .btn-primary {
-      background: linear-gradient(135deg, var(--neon-purple), #6d28d9);
-      color: white;
-      box-shadow: 0 0 24px rgba(139,92,246,0.45), 0 4px 16px rgba(0,0,0,0.4);
-    }
-
-    .btn-primary:hover {
-      box-shadow: 0 0 36px rgba(139,92,246,0.65), 0 4px 24px rgba(0,0,0,0.5);
-      transform: translateY(-1px);
-    }
-
-    .btn-ghost {
-      background: transparent;
-      color: var(--text-secondary);
-      border: 1px solid var(--border-bright);
-    }
-
-    .btn-ghost:hover {
-      color: var(--text-primary);
-      border-color: rgba(255,255,255,0.25);
-      background: rgba(255,255,255,0.04);
-    }
-
-    /* ─── Stats Bar ──────────────────────────────────────────────────── */
-    .stats-bar {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 1px;
-      background: var(--border);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      overflow: hidden;
-      margin-top: 72px;
-      animation: fadeIn 0.7s ease-out 0.5s both;
-    }
-
-    .stat-item {
-      background: var(--bg-surface);
-      padding: 28px 20px;
-      text-align: center;
-      transition: background var(--transition-fast);
-    }
-
-    .stat-item:hover { background: var(--bg-card-hover); }
-
-    .stat-value {
-      font-family: 'Space Mono', monospace;
-      font-size: 36px;
-      font-weight: 700;
-      line-height: 1;
-      margin-bottom: 6px;
-    }
-
-    .stat-value.purple { color: var(--neon-purple); text-shadow: 0 0 20px rgba(139,92,246,0.5); }
-    .stat-value.cyan   { color: var(--neon-cyan);   text-shadow: 0 0 20px rgba(34,211,238,0.5); }
-    .stat-value.green  { color: var(--neon-green);  text-shadow: 0 0 20px rgba(74,222,128,0.5); }
-
-    .stat-label {
-      font-size: 13px;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      font-weight: 500;
-    }
-
-    /* ─── Section Headers ────────────────────────────────────────────── */
-    .section-tag {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 12px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      color: var(--neon-cyan);
-      margin-bottom: 16px;
-    }
-
-    .section-tag::before {
-      content: '';
-      display: block;
-      width: 20px;
-      height: 2px;
-      background: var(--neon-cyan);
-      border-radius: 1px;
-    }
-
-    .section-title {
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: clamp(28px, 4vw, 42px);
-      font-weight: 700;
-      line-height: 1.15;
-      letter-spacing: -0.015em;
-      margin-bottom: 16px;
-    }
-
-    .section-desc {
-      font-size: 17px;
-      color: var(--text-secondary);
-      max-width: 520px;
-      line-height: 1.65;
-    }
-
-    /* ─── Phase Cards ────────────────────────────────────────────────── */
-    #mission { background: transparent; }
-
-    .mission-header { margin-bottom: 60px; }
-
-    .phases-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-      gap: 20px;
-    }
-
-    .phase-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      padding: 28px;
-      transition: all var(--transition-std);
-      position: relative;
-      overflow: hidden;
-      cursor: default;
-    }
-
-    .phase-card::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0;
-      height: 2px;
-      border-radius: 999px 999px 0 0;
-      transition: opacity var(--transition-std);
-      opacity: 0;
-    }
-
-    .phase-card:hover {
-      background: var(--bg-card-hover);
-      border-color: var(--border-bright);
-      transform: translateY(-3px);
-      box-shadow: var(--shadow-card);
-    }
-
-    .phase-card:hover::before { opacity: 1; }
-
-    .phase-card.c-purple::before { background: linear-gradient(90deg, var(--neon-purple), transparent); }
-    .phase-card.c-cyan::before   { background: linear-gradient(90deg, var(--neon-cyan), transparent); }
-    .phase-card.c-pink::before   { background: linear-gradient(90deg, var(--neon-pink), transparent); }
-    .phase-card.c-orange::before { background: linear-gradient(90deg, var(--neon-orange), transparent); }
-    .phase-card.c-green::before  { background: linear-gradient(90deg, var(--neon-green), transparent); }
-
-    .phase-card:hover.c-purple { box-shadow: 0 8px 32px rgba(139,92,246,0.15), var(--shadow-card); }
-    .phase-card:hover.c-cyan   { box-shadow: 0 8px 32px rgba(34,211,238,0.15), var(--shadow-card); }
-    .phase-card:hover.c-pink   { box-shadow: 0 8px 32px rgba(244,114,182,0.15), var(--shadow-card); }
-    .phase-card:hover.c-orange { box-shadow: 0 8px 32px rgba(251,146,60,0.15), var(--shadow-card); }
-    .phase-card:hover.c-green  { box-shadow: 0 8px 32px rgba(74,222,128,0.15), var(--shadow-card); }
-
-    .phase-top {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      margin-bottom: 20px;
-    }
-
-    .phase-icon {
-      width: 48px; height: 48px;
-      border-radius: var(--radius-md);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .phase-icon.bg-purple { background: rgba(139,92,246,0.15); }
-    .phase-icon.bg-cyan   { background: rgba(34,211,238,0.15); }
-    .phase-icon.bg-pink   { background: rgba(244,114,182,0.15); }
-    .phase-icon.bg-orange { background: rgba(251,146,60,0.15); }
-    .phase-icon.bg-green  { background: rgba(74,222,128,0.15); }
-
-    .phase-num {
-      font-family: 'Space Mono', monospace;
-      font-size: 12px;
-      font-weight: 700;
-      color: var(--text-muted);
-      padding: 4px 10px;
-      border: 1px solid var(--border);
-      border-radius: 999px;
-    }
-
-    .phase-title {
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: 18px;
-      font-weight: 600;
-      margin-bottom: 10px;
-      line-height: 1.3;
-    }
-
-    .phase-desc {
-      font-size: 14px;
-      color: var(--text-secondary);
-      line-height: 1.65;
-      margin-bottom: 20px;
-    }
-
-    .phase-tasks {
-      list-style: none;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .phase-task {
-      display: flex;
-      align-items: flex-start;
-      gap: 10px;
-      font-size: 13px;
-      color: var(--text-secondary);
-    }
-
-    .phase-task-dot {
-      width: 6px; height: 6px;
-      border-radius: 50%;
-      flex-shrink: 0;
-      margin-top: 7px;
-    }
-
-    .dot-purple { background: var(--neon-purple); box-shadow: 0 0 6px var(--neon-purple); }
-    .dot-cyan   { background: var(--neon-cyan);   box-shadow: 0 0 6px var(--neon-cyan); }
-    .dot-pink   { background: var(--neon-pink);   box-shadow: 0 0 6px var(--neon-pink); }
-    .dot-orange { background: var(--neon-orange); box-shadow: 0 0 6px var(--neon-orange); }
-    .dot-green  { background: var(--neon-green);  box-shadow: 0 0 6px var(--neon-green); }
-
-    /* ─── Habit Tracker ──────────────────────────────────────────────── */
-    #habits {
-      background: linear-gradient(180deg, transparent 0%, rgba(139,92,246,0.04) 50%, transparent 100%);
-    }
-
-    .habits-layout {
-      display: grid;
-      grid-template-columns: 1fr 380px;
-      gap: 48px;
-      align-items: start;
-    }
-
-    @media (max-width: 860px) {
-      .habits-layout { grid-template-columns: 1fr; }
-    }
-
-    .habit-list {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      margin-top: 36px;
-    }
-
-    .habit-item {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      padding: 16px 18px;
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-md);
-      cursor: pointer;
-      transition: all var(--transition-std);
-      user-select: none;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .habit-item::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: rgba(139,92,246,0);
-      transition: background var(--transition-std);
-    }
-
-    .habit-item:hover {
-      background: var(--bg-card-hover);
-      border-color: var(--border-bright);
-    }
-
-    .habit-item:hover::before { background: rgba(139,92,246,0.04); }
-
-    .habit-item.checked {
-      background: rgba(74,222,128,0.06);
-      border-color: rgba(74,222,128,0.25);
-    }
-
-    .habit-cb {
-      width: 22px; height: 22px;
-      border-radius: 6px;
-      border: 2px solid var(--border-bright);
-      background: transparent;
-      flex-shrink: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all var(--transition-std);
-    }
-
-    .habit-item.checked .habit-cb {
-      background: var(--neon-green);
-      border-color: var(--neon-green);
-      box-shadow: 0 0 10px rgba(74,222,128,0.5);
-    }
-
-    .habit-cb svg {
-      opacity: 0;
-      transform: scale(0.4);
-      transition: all var(--transition-std);
-    }
-
-    .habit-item.checked .habit-cb svg {
-      opacity: 1;
-      transform: scale(1);
-    }
-
-    .habit-label {
-      flex: 1;
-      font-size: 15px;
-      font-weight: 500;
-      transition: color var(--transition-std);
-    }
-
-    .habit-item.checked .habit-label {
-      color: var(--text-secondary);
-      text-decoration: line-through;
-    }
-
-    .habit-xp {
-      font-family: 'Space Mono', monospace;
-      font-size: 12px;
-      color: var(--neon-orange);
-      font-weight: 700;
-      padding: 3px 8px;
-      background: rgba(251,146,60,0.1);
-      border-radius: 999px;
-      border: 1px solid rgba(251,146,60,0.2);
-    }
-
-    /* ─── Streak Panel ───────────────────────────────────────────────── */
-    .streak-panel {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-xl);
-      padding: 32px;
-      position: sticky;
-      top: 90px;
-    }
-
-    .streak-title {
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: 15px;
-      font-weight: 600;
-      color: var(--text-secondary);
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      margin-bottom: 24px;
-    }
-
-    .streak-count {
-      font-family: 'Space Mono', monospace;
-      font-size: 72px;
-      font-weight: 700;
-      color: var(--neon-orange);
-      text-shadow: 0 0 32px rgba(251,146,60,0.5);
-      line-height: 1;
-      margin-bottom: 4px;
-    }
-
-    .streak-unit {
-      font-size: 14px;
-      color: var(--text-muted);
-      margin-bottom: 28px;
-    }
-
-    .progress-wrap {
-      margin-bottom: 24px;
-    }
-
-    .progress-label {
-      display: flex;
-      justify-content: space-between;
-      font-size: 13px;
-      color: var(--text-secondary);
-      margin-bottom: 10px;
-    }
-
-    .progress-track {
-      height: 8px;
-      background: rgba(255,255,255,0.06);
-      border-radius: 999px;
-      overflow: hidden;
-    }
-
-    .progress-fill {
-      height: 100%;
-      border-radius: 999px;
-      background: linear-gradient(90deg, var(--neon-purple), var(--neon-cyan));
-      box-shadow: 0 0 8px rgba(139,92,246,0.5);
-      transition: width 0.6s cubic-bezier(0.4,0,0.2,1);
-    }
-
-    .week-grid {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap: 6px;
-      margin-top: 20px;
-    }
-
-    .week-day {
-      aspect-ratio: 1;
-      border-radius: 6px;
-      border: 1px solid var(--border);
-      background: rgba(255,255,255,0.03);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 10px;
-      color: var(--text-muted);
-      font-family: 'Space Mono', monospace;
-      font-weight: 700;
-      transition: all var(--transition-std);
-    }
-
-    .week-day.done {
-      background: rgba(74,222,128,0.15);
-      border-color: rgba(74,222,128,0.4);
-      color: var(--neon-green);
-      box-shadow: 0 0 8px rgba(74,222,128,0.2);
-    }
-
-    .week-day.today {
-      border-color: var(--neon-purple);
-      color: var(--neon-purple);
-      box-shadow: 0 0 8px rgba(139,92,246,0.3);
-    }
-
-    .streak-btn {
-      width: 100%;
-      margin-top: 20px;
-      justify-content: center;
-    }
-
-    /* ─── Quotes ─────────────────────────────────────────────────────── */
-    #quotes {
-      text-align: center;
-      padding: 80px 0;
-    }
-
-    .quote-container {
-      max-width: 740px;
-      margin: 0 auto;
-      position: relative;
-      min-height: 200px;
-    }
-
-    .quote-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-xl);
-      padding: 48px;
-      position: relative;
-    }
-
-    .quote-card::before {
-      content: '"';
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: 120px;
-      line-height: 0.8;
-      color: rgba(139,92,246,0.15);
-      position: absolute;
-      top: 32px; left: 36px;
-      pointer-events: none;
-    }
-
-    .quote-text {
-      font-family: 'Space Grotesk', sans-serif;
-      font-size: clamp(18px, 2.5vw, 24px);
-      font-weight: 500;
-      line-height: 1.5;
-      color: var(--text-primary);
-      margin-bottom: 24px;
-      position: relative;
-      z-index: 1;
-      transition: opacity 0.3s ease-out;
-    }
-
-    .quote-author {
-      font-size: 14px;
-      color: var(--neon-purple);
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      transition: opacity 0.3s ease-out;
-    }
-
-    .quote-nav {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 12px;
-      margin-top: 28px;
-    }
-
-    .quote-dot {
-      width: 8px; height: 8px;
-      border-radius: 50%;
-      background: var(--border-bright);
-      cursor: pointer;
-      transition: all var(--transition-std);
-      border: none;
-    }
-
-    .quote-dot.active {
-      background: var(--neon-purple);
-      box-shadow: 0 0 8px var(--neon-purple);
-      width: 24px;
-      border-radius: 999px;
-    }
-
-    .quote-btn {
-      background: rgba(255,255,255,0.05);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      color: var(--text-secondary);
-      width: 36px; height: 36px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: all var(--transition-fast);
-    }
-
-    .quote-btn:hover {
-      background: rgba(255,255,255,0.1);
-      color: var(--text-primary);
-    }
-
-    /* ─── Footer ─────────────────────────────────────────────────────── */
-    footer {
-      border-top: 1px solid var(--border);
-      padding: 40px 0;
-      text-align: center;
-    }
-
-    .footer-text {
-      font-size: 14px;
-      color: var(--text-muted);
-    }
-
-    .footer-text span {
-      color: var(--neon-purple);
-    }
-
-    /* ─── Toast ──────────────────────────────────────────────────────── */
-    #toast {
-      position: fixed;
-      bottom: 28px;
-      right: 28px;
-      z-index: 999;
-      background: var(--bg-surface);
-      border: 1px solid var(--border-bright);
-      border-radius: var(--radius-md);
-      padding: 14px 20px;
-      font-size: 14px;
-      font-weight: 500;
-      color: var(--text-primary);
-      box-shadow: 0 8px 32px rgba(0,0,0,0.6);
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      transform: translateY(100px);
-      opacity: 0;
-      transition: all 0.3s ease-out;
-      pointer-events: none;
-      max-width: 320px;
-    }
-
-    #toast.show {
-      transform: translateY(0);
-      opacity: 1;
-    }
-
-    #toast.success { border-color: rgba(74,222,128,0.4); }
-    #toast.info    { border-color: rgba(139,92,246,0.4); }
-
-    /* ─── Responsive ─────────────────────────────────────────────────── */
-    @media (max-width: 768px) {
-      section { padding: 72px 0; }
-      .nav-links { display: none; }
-      .stats-bar { grid-template-columns: 1fr; }
-      .phases-grid { grid-template-columns: 1fr; }
-      .quote-card { padding: 32px 24px; }
-      .quote-card::before { font-size: 72px; }
-    }
-
-    @media (max-width: 480px) {
-      .container { padding: 0 16px; }
-      .hero-actions { flex-direction: column; align-items: center; }
-    }
-
-    /* ─── Scroll animations ──────────────────────────────────────────── */
-    .reveal {
-      opacity: 0;
-      transform: translateY(28px);
-      transition: opacity 0.6s ease-out, transform 0.6s ease-out;
-    }
-
-    .reveal.visible {
-      opacity: 1;
-      transform: translateY(0);
-    }
-
-    .reveal-delay-1 { transition-delay: 0.1s; }
-    .reveal-delay-2 { transition-delay: 0.2s; }
-    .reveal-delay-3 { transition-delay: 0.3s; }
-    .reveal-delay-4 { transition-delay: 0.4s; }
-
-    /* ─── SVG icon helper ────────────────────────────────────────────── */
-    .icon { flex-shrink: 0; }
-  </style>
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg"/>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+  <!-- CSS -->
+  <link rel="stylesheet" href="css/variables.css"/>
+  <link rel="stylesheet" href="css/base.css"/>
+  <link rel="stylesheet" href="css/components.css"/>
+  <link rel="stylesheet" href="css/sections.css"/>
 </head>
 <body>
 
-<!-- ─── Nav ──────────────────────────────────────────────────────────── -->
-<nav aria-label="Main navigation">
-  <div class="nav-inner">
-    <a href="#hero" class="nav-logo" aria-label="Save Little home">
-      <div class="nav-logo-icon" aria-hidden="true">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-        </svg>
-      </div>
-      Save Little
-    </a>
-    <ul class="nav-links" role="list">
-      <li><a href="#mission">The Plan</a></li>
-      <li><a href="#habits">Daily Habits</a></li>
-      <li><a href="#quotes">Motivation</a></li>
-      <li><a href="#habits" class="btn btn-ghost nav-cta">Start Today</a></li>
-    </ul>
-  </div>
-</nav>
-
-<!-- ─── Hero ─────────────────────────────────────────────────────────── -->
-<section id="hero" aria-labelledby="hero-title">
-  <div class="hero-glow hero-glow-1" aria-hidden="true"></div>
-  <div class="hero-glow hero-glow-2" aria-hidden="true"></div>
-  <div class="hero-glow hero-glow-3" aria-hidden="true"></div>
-  <div class="container">
-    <div class="hero-badge" role="status" aria-label="Mission status: active">
-      <div class="hero-badge-dot" aria-hidden="true"></div>
-      OPERATION: REAL LIFE — ACTIVE
-    </div>
-    <h1 id="hero-title" class="hero-title">
-      Little deserves a<br />
-      <span class="hero-title-line2">better endgame.</span>
-    </h1>
-    <p class="hero-sub">
-      GTA6 is designed to be addictive. This site is designed to fight back.
-      A structured plan to help Little trade virtual achievements for real ones.
-    </p>
-    <div class="hero-actions">
-      <a href="#habits" class="btn btn-primary">
-        <svg class="icon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
-        Start Tracking Today
+  <!-- Nav -->
+  <nav aria-label="Main navigation">
+    <div class="nav-inner container">
+      <a href="#hero" class="nav-logo" aria-label="Save Little home">
+        <div class="nav-logo-icon" aria-hidden="true">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        </div>
+        Save Little
       </a>
-      <a href="#mission" class="btn btn-ghost">
-        <svg class="icon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 8 12 12 14 14"/></svg>
-        See The Plan
-      </a>
+      <ul class="nav-links" role="list">
+        <li><a href="#mission">The Plan</a></li>
+        <li><a href="#habits">Daily Habits</a></li>
+        <li><a href="#quotes">Motivation</a></li>
+        <li><a href="#habits" class="btn btn-primary btn-sm">Start Today</a></li>
+      </ul>
     </div>
+  </nav>
 
-    <div class="stats-bar reveal" role="region" aria-label="Mission statistics">
-      <div class="stat-item">
-        <div class="stat-value purple" id="stat-streak" aria-live="polite">0</div>
-        <div class="stat-label">Day Streak</div>
+  <!-- Hero -->
+  <section id="hero" aria-labelledby="hero-title">
+    <div class="hero-glow hero-glow-1" aria-hidden="true"></div>
+    <div class="hero-glow hero-glow-2" aria-hidden="true"></div>
+    <div class="hero-glow hero-glow-3" aria-hidden="true"></div>
+    <div class="container">
+      <div class="hero-badge">
+        <div class="badge-dot" aria-hidden="true"></div>
+        OPERATION: REAL LIFE — ACTIVE
       </div>
-      <div class="stat-item">
-        <div class="stat-value cyan" id="stat-habits" aria-live="polite">0/8</div>
-        <div class="stat-label">Habits Today</div>
+      <h1 id="hero-title" class="hero-title">Little deserves a<br/><span class="gradient-text">better endgame.</span></h1>
+      <p class="hero-sub">GTA6 is designed to be addictive. This site is designed to fight back. A structured plan to help Little trade virtual achievements for real ones.</p>
+      <div class="hero-actions">
+        <a href="#habits" class="btn btn-primary">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+          Start Tracking Today
+        </a>
+        <a href="#mission" class="btn btn-ghost">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          See The Plan
+        </a>
       </div>
-      <div class="stat-item">
-        <div class="stat-value green" id="stat-xp" aria-live="polite">0</div>
-        <div class="stat-label">Total XP Earned</div>
+      <div class="stats-bar reveal" role="region" aria-label="Mission statistics">
+        <div class="stat-item">
+          <div class="stat-value purple" id="stat-streak" aria-live="polite">0</div>
+          <div class="stat-label">Day Streak</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value cyan" id="stat-habits" aria-live="polite">0/8</div>
+          <div class="stat-label">Habits Today</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value green" id="stat-xp" aria-live="polite">0</div>
+          <div class="stat-label">Total XP Earned</div>
+        </div>
       </div>
     </div>
-  </div>
-</section>
+  </section>
 
-<!-- ─── Mission Plan ──────────────────────────────────────────────────── -->
-<section id="mission" aria-labelledby="mission-title">
-  <div class="container">
-    <div class="mission-header">
-      <div class="section-tag" aria-hidden="true">The Mission</div>
-      <h2 id="mission-title" class="section-title reveal">
-        A 5-phase plan to<br />level up for real.
-      </h2>
-      <p class="section-desc reveal reveal-delay-1">
-        Every great game has a walkthrough. Here's yours for life.
-        Follow these phases in order — each one builds on the last.
-      </p>
-    </div>
-
-    <div class="phases-grid" role="list">
-
-      <!-- Phase 1 -->
-      <article class="phase-card c-purple reveal" role="listitem" aria-label="Phase 1: Understand the Root Cause">
-        <div class="phase-top">
-          <div class="phase-icon bg-purple" aria-hidden="true">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-          </div>
-          <span class="phase-num" aria-label="Phase 1 of 5">01</span>
-        </div>
-        <h3 class="phase-title">Understand the Root Cause</h3>
-        <p class="phase-desc">Before intervening, figure out why Little plays so much. Gaming fills a void — the question is, what void?</p>
-        <ul class="phase-tasks" aria-label="Action items">
-          <li class="phase-task"><span class="phase-task-dot dot-purple" aria-hidden="true"></span>Have an honest, no-judgment conversation</li>
-          <li class="phase-task"><span class="phase-task-dot dot-purple" aria-hidden="true"></span>Ask what GTA gives him that real life doesn't</li>
-          <li class="phase-task"><span class="phase-task-dot dot-purple" aria-hidden="true"></span>Identify if it's escapism, boredom, or social</li>
-        </ul>
-      </article>
-
-      <!-- Phase 2 -->
-      <article class="phase-card c-cyan reveal reveal-delay-1" role="listitem" aria-label="Phase 2: Set Soft Screen Time Limits">
-        <div class="phase-top">
-          <div class="phase-icon bg-cyan" aria-hidden="true">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#22d3ee" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-          </div>
-          <span class="phase-num" aria-label="Phase 2 of 5">02</span>
-        </div>
-        <h3 class="phase-title">Set Soft Screen Time Limits</h3>
-        <p class="phase-desc">Don't ban the game — that creates resistance and resentment. Agree on boundaries together so he has buy-in.</p>
-        <ul class="phase-tasks" aria-label="Action items">
-          <li class="phase-task"><span class="phase-task-dot dot-cyan" aria-hidden="true"></span>Max 2hrs weekdays, 3hrs weekends</li>
-          <li class="phase-task"><span class="phase-task-dot dot-cyan" aria-hidden="true"></span>No playing after midnight</li>
-          <li class="phase-task"><span class="phase-task-dot dot-cyan" aria-hidden="true"></span>Use Cold Turkey or Windows Family Safety</li>
-        </ul>
-      </article>
-
-      <!-- Phase 3 -->
-      <article class="phase-card c-pink reveal reveal-delay-2" role="listitem" aria-label="Phase 3: Replace the Dopamine Source">
-        <div class="phase-top">
-          <div class="phase-icon bg-pink" aria-hidden="true">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f472b6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-          </div>
-          <span class="phase-num" aria-label="Phase 3 of 5">03</span>
-        </div>
-        <h3 class="phase-title">Replace the Dopamine Source</h3>
-        <p class="phase-desc">GTA gives Little achievement, excitement, and progress. The goal: recreate that rush in the real world.</p>
-        <ul class="phase-tasks" aria-label="Action items">
-          <li class="phase-task"><span class="phase-task-dot dot-pink" aria-hidden="true"></span>Gym — physical progress he can see weekly</li>
-          <li class="phase-task"><span class="phase-task-dot dot-pink" aria-hidden="true"></span>Learn to code, design, or make music</li>
-          <li class="phase-task"><span class="phase-task-dot dot-pink" aria-hidden="true"></span>Start a side hustle or build something real</li>
-        </ul>
-      </article>
-
-      <!-- Phase 4 -->
-      <article class="phase-card c-orange reveal reveal-delay-1" role="listitem" aria-label="Phase 4: Build a Future He's Excited About">
-        <div class="phase-top">
-          <div class="phase-icon bg-orange" aria-hidden="true">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fb923c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-          </div>
-          <span class="phase-num" aria-label="Phase 4 of 5">04</span>
-        </div>
-        <h3 class="phase-title">Build a Future He's Excited About</h3>
-        <p class="phase-desc">Gaming fills a vacuum. The real fix is giving Little something to work toward. When he has a vision, GTA fades.</p>
-        <ul class="phase-tasks" aria-label="Action items">
-          <li class="phase-task"><span class="phase-task-dot dot-orange" aria-hidden="true"></span>Map out his 3-year life vision together</li>
-          <li class="phase-task"><span class="phase-task-dot dot-orange" aria-hidden="true"></span>Identify one small step for this week</li>
-          <li class="phase-task"><span class="phase-task-dot dot-orange" aria-hidden="true"></span>Make his goal feel more exciting than the game</li>
-        </ul>
-      </article>
-
-      <!-- Phase 5 — full width on larger screens -->
-      <article class="phase-card c-green reveal reveal-delay-2" role="listitem" aria-label="Phase 5: Be a Good Friend, Not a Cop" style="grid-column: 1 / -1;">
-        <div class="phase-top">
-          <div class="phase-icon bg-green" aria-hidden="true">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-          </div>
-          <span class="phase-num" aria-label="Phase 5 of 5">05</span>
-        </div>
-        <h3 class="phase-title">Be a Good Friend, Not a Cop</h3>
-        <p class="phase-desc" style="max-width: 600px;">The intervention only works if Little doesn't feel attacked or judged. Your job is to make real life more attractive than GTA6, not to shame him out of a habit.</p>
-        <ul class="phase-tasks" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px 32px;" aria-label="Action items">
-          <li class="phase-task"><span class="phase-task-dot dot-green" aria-hidden="true"></span>Never shame him for playing</li>
-          <li class="phase-task"><span class="phase-task-dot dot-green" aria-hidden="true"></span>Invite him to do things, don't tell him to stop</li>
-          <li class="phase-task"><span class="phase-task-dot dot-green" aria-hidden="true"></span>Celebrate every small win out loud</li>
-          <li class="phase-task"><span class="phase-task-dot dot-green" aria-hidden="true"></span>Check in weekly — with genuine care</li>
-        </ul>
-      </article>
-
-    </div>
-  </div>
-</section>
-
-<!-- ─── Habit Tracker ─────────────────────────────────────────────────── -->
-<section id="habits" aria-labelledby="habits-title">
-  <div class="container">
-    <div class="habits-layout">
-      <div>
-        <div class="section-tag" aria-hidden="true">Daily Habits</div>
-        <h2 id="habits-title" class="section-title reveal">Your daily quest log.</h2>
-        <p class="section-desc reveal reveal-delay-1">
-          Check off habits every day. Each one earns XP and builds the streak.
-          Real progress happens one day at a time.
-        </p>
-
-        <ul class="habit-list reveal reveal-delay-2" role="list" aria-label="Daily habits checklist" id="habit-list">
-          <!-- Injected by JS -->
-        </ul>
-
-        <button class="btn btn-ghost reveal reveal-delay-3" id="reset-btn" onclick="resetHabits()" style="margin-top: 20px;" aria-label="Reset all habits for a new day">
-          <svg class="icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.86"/></svg>
-          Reset for new day
-        </button>
+  <!-- Mission -->
+  <section id="mission" aria-labelledby="mission-title">
+    <div class="container">
+      <div class="section-header">
+        <div class="section-tag">The Mission</div>
+        <h2 id="mission-title" class="section-title reveal">A 5-phase plan to<br/>level up for real.</h2>
+        <p class="section-desc reveal">Every great game has a walkthrough. Here's yours for life.</p>
       </div>
+      <div class="phases-grid" role="list">
 
-      <!-- Streak Panel -->
-      <aside class="streak-panel reveal" aria-labelledby="streak-heading">
-        <div class="streak-title" id="streak-heading">Current Streak</div>
-        <div class="streak-count" id="streak-display" aria-live="polite">0</div>
-        <div class="streak-unit">days in a row</div>
-
-        <div class="progress-wrap">
-          <div class="progress-label">
-            <span>Today's Progress</span>
-            <span id="progress-pct" aria-live="polite">0%</span>
+        <!-- Phase 1 -->
+        <article class="phase-card c-purple reveal" role="listitem">
+          <div class="phase-top">
+            <div class="phase-icon bg-purple">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            </div>
+            <span class="phase-num">01</span>
           </div>
-          <div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" id="progress-bar-wrap">
-            <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+          <h3 class="phase-title">Understand the Root Cause</h3>
+          <p class="phase-desc">Before intervening, figure out why Little plays so much. Gaming fills a void — the question is, what void?</p>
+          <ul class="phase-tasks">
+            <li class="phase-task"><span class="dot dot-purple"></span>Have an honest, no-judgment conversation</li>
+            <li class="phase-task"><span class="dot dot-purple"></span>Ask what GTA gives him that real life doesn't</li>
+            <li class="phase-task"><span class="dot dot-purple"></span>Identify if it's escapism, boredom, or social</li>
+          </ul>
+        </article>
+
+        <!-- Phase 2 -->
+        <article class="phase-card c-cyan reveal reveal-delay-1" role="listitem">
+          <div class="phase-top">
+            <div class="phase-icon bg-cyan">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            </div>
+            <span class="phase-num">02</span>
           </div>
-        </div>
+          <h3 class="phase-title">Set Soft Screen Time Limits</h3>
+          <p class="phase-desc">Don't ban the game — that creates resistance. Agree on boundaries together so he has buy-in.</p>
+          <ul class="phase-tasks">
+            <li class="phase-task"><span class="dot dot-cyan"></span>Max 2hrs weekdays, 3hrs weekends</li>
+            <li class="phase-task"><span class="dot dot-cyan"></span>No playing after midnight</li>
+            <li class="phase-task"><span class="dot dot-cyan"></span>Use Cold Turkey or Windows Family Safety</li>
+          </ul>
+        </article>
 
-        <div class="week-grid" id="week-grid" aria-label="Week overview" role="list">
-          <!-- Injected by JS -->
-        </div>
+        <!-- Phase 3 -->
+        <article class="phase-card c-pink reveal reveal-delay-2" role="listitem">
+          <div class="phase-top">
+            <div class="phase-icon bg-pink">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            </div>
+            <span class="phase-num">03</span>
+          </div>
+          <h3 class="phase-title">Replace the Dopamine Source</h3>
+          <p class="phase-desc">GTA gives Little achievement, excitement, and progress. Recreate that rush in the real world.</p>
+          <ul class="phase-tasks">
+            <li class="phase-task"><span class="dot dot-pink"></span>Gym — physical progress he can see weekly</li>
+            <li class="phase-task"><span class="dot dot-pink"></span>Learn to code, design, or make music</li>
+            <li class="phase-task"><span class="dot dot-pink"></span>Start a side hustle or build something real</li>
+          </ul>
+        </article>
 
-        <button class="btn btn-primary streak-btn" id="complete-day-btn" onclick="completeDay()" aria-label="Mark today as complete">
-          <svg class="icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
-          Complete Day
-        </button>
-      </aside>
+        <!-- Phase 4 -->
+        <article class="phase-card c-orange reveal reveal-delay-1" role="listitem">
+          <div class="phase-top">
+            <div class="phase-icon bg-orange">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            </div>
+            <span class="phase-num">04</span>
+          </div>
+          <h3 class="phase-title">Build a Future He's Excited About</h3>
+          <p class="phase-desc">Gaming fills a vacuum. The real fix is giving Little something to work toward.</p>
+          <ul class="phase-tasks">
+            <li class="phase-task"><span class="dot dot-orange"></span>Map out his 3-year life vision together</li>
+            <li class="phase-task"><span class="dot dot-orange"></span>Identify one small step for this week</li>
+            <li class="phase-task"><span class="dot dot-orange"></span>Make his goal feel more exciting than the game</li>
+          </ul>
+        </article>
+
+        <!-- Phase 5 — full width -->
+        <article class="phase-card c-green phase-full reveal reveal-delay-2" role="listitem">
+          <div class="phase-top">
+            <div class="phase-icon bg-green">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            </div>
+            <span class="phase-num">05</span>
+          </div>
+          <h3 class="phase-title">Be a Good Friend, Not a Cop</h3>
+          <p class="phase-desc">The intervention only works if Little doesn't feel attacked. Make real life more attractive than GTA6.</p>
+          <ul class="phase-tasks phase-tasks-grid">
+            <li class="phase-task"><span class="dot dot-green"></span>Never shame him for playing</li>
+            <li class="phase-task"><span class="dot dot-green"></span>Invite him to do things, don't tell him to stop</li>
+            <li class="phase-task"><span class="dot dot-green"></span>Celebrate every small win out loud</li>
+            <li class="phase-task"><span class="dot dot-green"></span>Check in weekly — with genuine care</li>
+          </ul>
+        </article>
+
+      </div>
     </div>
-  </div>
-</section>
+  </section>
 
-<!-- ─── Quotes ────────────────────────────────────────────────────────── -->
-<section id="quotes" aria-labelledby="quotes-title">
-  <div class="container">
-    <div class="section-tag" aria-hidden="true" style="justify-content:center;">Fuel for the Journey</div>
-    <h2 id="quotes-title" class="section-title reveal" style="text-align:center; margin-bottom:48px;">Words that hit different.</h2>
+  <!-- Habits -->
+  <section id="habits" aria-labelledby="habits-title">
+    <div class="container">
+      <div class="habits-layout">
+        <div class="habits-left">
+          <div class="section-tag">Daily Habits</div>
+          <h2 id="habits-title" class="section-title reveal">Your daily quest log.</h2>
+          <p class="section-desc reveal">Check off habits every day. Each one earns XP and builds the streak.</p>
+          <ul class="habit-list reveal" role="list" aria-label="Daily habits checklist" id="habit-list"></ul>
+          <button class="btn btn-ghost btn-reset reveal" id="reset-btn" aria-label="Reset all habits for a new day">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3"/></svg>
+            Reset for new day
+          </button>
+        </div>
+        <aside class="streak-panel reveal" aria-labelledby="streak-heading">
+          <div class="streak-panel-title" id="streak-heading">Current Streak</div>
+          <div class="streak-count" id="streak-display" aria-live="polite">0</div>
+          <div class="streak-unit">days in a row</div>
+          <div class="progress-wrap">
+            <div class="progress-label">
+              <span>Today's Progress</span>
+              <span id="progress-pct" aria-live="polite">0%</span>
+            </div>
+            <div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="progress-bar-wrap">
+              <div class="progress-fill" id="progress-fill"></div>
+            </div>
+          </div>
+          <div class="week-grid" id="week-grid" aria-label="Week overview" role="list"></div>
+          <button class="btn btn-primary btn-block" id="complete-day-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+            Complete Day
+          </button>
+        </aside>
+      </div>
+    </div>
+  </section>
 
-    <div class="quote-container reveal" role="region" aria-label="Motivational quotes" aria-live="polite">
-      <div class="quote-card">
+  <!-- Quotes -->
+  <section id="quotes" aria-labelledby="quotes-title">
+    <div class="container quotes-container">
+      <div class="section-tag section-tag-center">Fuel for the Journey</div>
+      <h2 id="quotes-title" class="section-title section-title-center reveal">Words that hit different.</h2>
+      <div class="quote-card reveal" role="region" aria-label="Motivational quotes" aria-live="polite">
         <p class="quote-text" id="quote-text"></p>
         <p class="quote-author" id="quote-author"></p>
       </div>
       <div class="quote-nav" role="group" aria-label="Quote navigation">
-        <button class="quote-btn" onclick="prevQuote()" aria-label="Previous quote">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
+        <button class="quote-btn" id="quote-prev" aria-label="Previous quote">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
         </button>
-        <div id="quote-dots" role="list" style="display:flex; gap:8px; align-items:center;"></div>
-        <button class="quote-btn" onclick="nextQuote()" aria-label="Next quote">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+        <div id="quote-dots" role="list" class="quote-dots"></div>
+        <button class="quote-btn" id="quote-next" aria-label="Next quote">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
         </button>
       </div>
     </div>
+  </section>
+
+  <!-- Footer -->
+  <footer role="contentinfo">
+    <div class="container footer-inner">
+      <p class="footer-text">Built with love for <span class="accent">Little</span> — because real friends don't watch you lose.</p>
+    </div>
+  </footer>
+
+  <!-- Toast -->
+  <div id="toast" role="alert" aria-live="assertive">
+    <svg id="toast-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+    <span id="toast-msg"></span>
   </div>
-</section>
 
-<!-- ─── Footer ───────────────────────────────────────────────────────── -->
-<footer role="contentinfo">
-  <div class="container">
-    <p class="footer-text">
-      Built with love for <span>Little</span> — because real friends don't watch you lose.
-    </p>
-  </div>
-</footer>
-
-<!-- ─── Toast ────────────────────────────────────────────────────────── -->
-<div id="toast" role="alert" aria-live="assertive">
-  <svg id="toast-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
-  <span id="toast-msg"></span>
-</div>
-
-<script>
-  /* ─── Data ─────────────────────────────────────────────────────────── */
-  const HABITS = [
-    { id: 'h1', label: 'No GTA6 before noon',          xp: 50 },
-    { id: 'h2', label: 'Drank 2L of water',            xp: 20 },
-    { id: 'h3', label: 'Did 20+ mins of exercise',     xp: 60 },
-    { id: 'h4', label: 'Learned something new today',  xp: 40 },
-    { id: 'h5', label: 'Went outside / touched grass', xp: 30 },
-    { id: 'h6', label: 'Talked to someone in person',  xp: 35 },
-    { id: 'h7', label: 'Worked on a real-life goal',   xp: 80 },
-    { id: 'h8', label: 'In bed before 1am',            xp: 45 },
-  ];
-
-  const QUOTES = [
-    { text: "Every hour you spend grinding in GTA6 is an hour the future version of you is waiting for.", author: "Your friend who cares" },
-    { text: "The game gives you achievements. Life gives you everything else.", author: "Operation: Real Life" },
-    { text: "You can respawn in a game. You can't respawn your twenties.", author: "Hard truth" },
-    { text: "The grind you put into the game — imagine if you put that into yourself.", author: "Think about it" },
-    { text: "The best players in life don't have the highest KD. They have the most self-discipline.", author: "Real talk" },
-    { text: "Being good at a video game is a skill. Being good at life is a superpower.", author: "Operation: Real Life" },
-    { text: "Your future self is sending you a message: log off and start.", author: "The future Little" },
-  ];
-
-  const DAYS_SHORT = ['M','T','W','T','F','S','S'];
-
-  /* ─── State ────────────────────────────────────────────────────────── */
-  let state = JSON.parse(localStorage.getItem('save-little-state') || 'null') || {
-    streak: 0,
-    totalXP: 0,
-    checked: {},
-    weekDone: {},    // ISO date string -> true
-    lastCompleted: null,
-    quoteIndex: 0,
-  };
-
-  /* ─── Save ─────────────────────────────────────────────────────────── */
-  function save() {
-    localStorage.setItem('save-little-state', JSON.stringify(state));
-  }
-
-  /* ─── Habit List ────────────────────────────────────────────────────── */
-  function renderHabits() {
-    const list = document.getElementById('habit-list');
-    list.innerHTML = '';
-    HABITS.forEach(h => {
-      const checked = !!state.checked[h.id];
-      const li = document.createElement('li');
-      li.className = 'habit-item' + (checked ? ' checked' : '');
-      li.setAttribute('role', 'checkbox');
-      li.setAttribute('aria-checked', String(checked));
-      li.setAttribute('aria-label', h.label + (checked ? ' — completed' : ''));
-      li.setAttribute('tabindex', '0');
-      li.dataset.id = h.id;
-      li.innerHTML = `
-        <div class="habit-cb" aria-hidden="true">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#05050f" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-        </div>
-        <span class="habit-label">${h.label}</span>
-        <span class="habit-xp" aria-label="${h.xp} XP">+${h.xp} XP</span>
-      `;
-      li.addEventListener('click', () => toggleHabit(h.id, h.xp));
-      li.addEventListener('keydown', e => { if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); toggleHabit(h.id, h.xp); } });
-      list.appendChild(li);
-    });
-    updateStats();
-  }
-
-  function toggleHabit(id, xp) {
-    if (state.checked[id]) {
-      delete state.checked[id];
-      state.totalXP = Math.max(0, state.totalXP - xp);
-      showToast('Habit unchecked', 'info');
-    } else {
-      state.checked[id] = true;
-      state.totalXP += xp;
-      showToast('+' + xp + ' XP earned!', 'success');
-    }
-    save();
-    renderHabits();
-  }
-
-  function resetHabits() {
-    state.checked = {};
-    save();
-    renderHabits();
-    showToast('New day — reset complete!', 'info');
-  }
-
-  /* ─── Stats ────────────────────────────────────────────────────────── */
-  function updateStats() {
-    const done = Object.keys(state.checked).length;
-    const total = HABITS.length;
-    const pct = Math.round((done / total) * 100);
-
-    document.getElementById('stat-streak').textContent = state.streak;
-    document.getElementById('stat-habits').textContent = done + '/' + total;
-    document.getElementById('stat-xp').textContent = state.totalXP;
-    document.getElementById('streak-display').textContent = state.streak;
-    document.getElementById('progress-pct').textContent = pct + '%';
-    document.getElementById('progress-fill').style.width = pct + '%';
-    document.getElementById('progress-bar-wrap').setAttribute('aria-valuenow', pct);
-
-    renderWeekGrid();
-  }
-
-  /* ─── Complete Day ──────────────────────────────────────────────────── */
-  function completeDay() {
-    const today = new Date().toISOString().split('T')[0];
-    if (state.lastCompleted === today) {
-      showToast('Already completed today!', 'info'); return;
-    }
-    const done = Object.keys(state.checked).length;
-    if (done < 3) {
-      showToast('Complete at least 3 habits first!', 'info'); return;
-    }
-    const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
-    if (state.lastCompleted === yesterday) {
-      state.streak += 1;
-    } else if (!state.lastCompleted) {
-      state.streak = 1;
-    } else {
-      state.streak = 1;
-    }
-    state.weekDone[today] = true;
-    state.lastCompleted = today;
-    save();
-    updateStats();
-    showToast('Day complete! Streak: ' + state.streak, 'success');
-  }
-
-  /* ─── Week Grid ─────────────────────────────────────────────────────── */
-  function renderWeekGrid() {
-    const grid = document.getElementById('week-grid');
-    grid.innerHTML = '';
-    const now = new Date();
-    const dayOfWeek = (now.getDay() + 6) % 7; // Mon=0
-    for (let i = 0; i < 7; i++) {
-      const d = new Date(now);
-      d.setDate(now.getDate() - dayOfWeek + i);
-      const iso = d.toISOString().split('T')[0];
-      const isToday = i === dayOfWeek;
-      const isDone  = !!state.weekDone[iso];
-      const div = document.createElement('div');
-      div.className = 'week-day' + (isDone ? ' done' : '') + (isToday && !isDone ? ' today' : '');
-      div.setAttribute('role', 'listitem');
-      div.setAttribute('aria-label', DAYS_SHORT[i] + (isDone ? ' — done' : isToday ? ' — today' : ''));
-      div.textContent = DAYS_SHORT[i];
-      grid.appendChild(div);
-    }
-  }
-
-  /* ─── Quotes ────────────────────────────────────────────────────────── */
-  let quoteTimer;
-
-  function renderQuote() {
-    const q = QUOTES[state.quoteIndex];
-    const textEl   = document.getElementById('quote-text');
-    const authorEl = document.getElementById('quote-author');
-    textEl.style.opacity   = '0';
-    authorEl.style.opacity = '0';
-    setTimeout(() => {
-      textEl.textContent   = q.text;
-      authorEl.textContent = '— ' + q.author;
-      textEl.style.opacity   = '1';
-      authorEl.style.opacity = '1';
-    }, 220);
-    renderQuoteDots();
-  }
-
-  function renderQuoteDots() {
-    const dots = document.getElementById('quote-dots');
-    dots.innerHTML = '';
-    QUOTES.forEach((_, i) => {
-      const btn = document.createElement('button');
-      btn.className = 'quote-dot' + (i === state.quoteIndex ? ' active' : '');
-      btn.setAttribute('role', 'listitem');
-      btn.setAttribute('aria-label', 'Go to quote ' + (i + 1));
-      btn.setAttribute('aria-pressed', String(i === state.quoteIndex));
-      btn.onclick = () => { state.quoteIndex = i; save(); renderQuote(); resetQuoteTimer(); };
-      dots.appendChild(btn);
-    });
-  }
-
-  function nextQuote() {
-    state.quoteIndex = (state.quoteIndex + 1) % QUOTES.length;
-    save(); renderQuote(); resetQuoteTimer();
-  }
-
-  function prevQuote() {
-    state.quoteIndex = (state.quoteIndex - 1 + QUOTES.length) % QUOTES.length;
-    save(); renderQuote(); resetQuoteTimer();
-  }
-
-  function resetQuoteTimer() {
-    clearInterval(quoteTimer);
-    quoteTimer = setInterval(nextQuote, 7000);
-  }
-
-  /* ─── Toast ─────────────────────────────────────────────────────────── */
-  let toastTimer;
-  function showToast(msg, type = 'info') {
-    const el   = document.getElementById('toast');
-    const msgEl = document.getElementById('toast-msg');
-    const icon  = document.getElementById('toast-icon');
-    clearTimeout(toastTimer);
-    el.className = '';
-    msgEl.textContent = msg;
-    if (type === 'success') {
-      el.className = 'show success';
-      icon.innerHTML = '<polyline points="20 6 9 17 4 12"/>';
-    } else {
-      el.className = 'show info';
-      icon.innerHTML = '<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>';
-    }
-    toastTimer = setTimeout(() => { el.className = ''; }, 3200);
-  }
-
-  /* ─── Scroll Reveal ─────────────────────────────────────────────────── */
-  function initReveal() {
-    const obs = new IntersectionObserver(entries => {
-      entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); } });
-    }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
-    document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
-  }
-
-  /* ─── Init ───────────────────────────────────────────────────────────── */
-  document.addEventListener('DOMContentLoaded', () => {
-    renderHabits();
-    renderQuote();
-    resetQuoteTimer();
-    initReveal();
-  });
-</script>
+  <script type="module" src="js/main.js"></script>
 </body>
 </html>
